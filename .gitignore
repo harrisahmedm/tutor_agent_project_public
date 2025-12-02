@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# NCERT textbook PDFs must NOT be committed to the repository
+data/bookchapters/
+
+# But allow Git to traverse directories (un-ignore directories only)
+!data/bookchapters/**/
+
+# Keep any .gitkeep files so the empty folders remain in repo
+!data/bookchapters/**/.gitkeep
+
+# pycache folders and python bytecode files
+__pycache__/
+*.pyc
+
+# Ignore test.py created for local testing
+src/tools/test.py
+
+# Ignore locally generated logs
+logs/

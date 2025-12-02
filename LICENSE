@@ -1,0 +1,65 @@
+MIT License (with NCERT Content Exception)
+-----------------------------------------
+
+Copyright (c) 2025 Harris Ahmed Mohammed Ismail (Harris Ahmed M)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights  
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
+copies of the Software, subject to the following conditions:
+
+1. This license applies **only to the original source code** of this project.
+   **It expressly excludes any NCERT textbooks, pages, images, extracted text,
+   or derivative works thereof.**
+
+2. This project requires users to supply their own legally obtained NCERT
+   textbook files. The author of this repository does **not** distribute,
+   host, or include any NCERT content.
+
+3. Public deployment of any application that uses NCERT textbooks or derived
+   content is **strictly prohibited**, as per NCERT’s copyright policy.
+   The Software may be used **only for local, personal, academic evaluation**.
+
+4. The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL  
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING  
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER  
+DEALINGS IN THE SOFTWARE.
+
+------------------------------------------------------------
+
+ADDENDUM — THIRD-PARTY CONTENT DISCLAIMER
+
+This repository does NOT include any NCERT textbook material.
+Users must obtain NCERT textbooks separately from the official
+NCERT website. Copyright for NCERT materials remains fully
+owned by NCERT.
+
+The license of this repository applies ONLY to the source code
+contained herein. It does NOT grant any rights to copy,
+redistribute, modify, or publicly host NCERT textbooks or any
+other copyrighted third-party content.
+
+By using this project, you acknowledge:
+
+- NCERT textbooks must be used only in accordance with NCERT’s
+  copyright policy.
+
+- No redistribution or public deployment of NCERT materials is
+  permitted.
+
+- This project must be run locally only and must not be deployed
+  on any public platform or server.
+
+This clarification supersedes any interpretation of the main
+license text that might suggest otherwise.
+
+------------------------------------------------------------
+
+

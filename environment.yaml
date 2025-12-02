@@ -1,0 +1,18 @@
+name: tutoragent
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - streamlit
+      - google-adk
+      - google-generativeai
+      - python-dotenv
+      - pypdf
+      - pillow
+      - pymupdf
+      - reportlab
+      - weasyprint
+      - markdown
+
