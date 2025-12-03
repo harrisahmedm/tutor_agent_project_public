@@ -41,9 +41,11 @@ def _log_event_brief(event):
     try:
         name = getattr(event, "name", None) or getattr(event, "type", None)
         # print a one-line summary to terminal
-        print(f"[ADK EVENT] {name} - attrs: {list(getattr(event, '__dict__', {}).keys())}")
+        # print(f"[ADK EVENT] {name} - attrs: {list(getattr(event, '__dict__', {}).keys())}")
+        print(f"[ADK EVENT] {name}")
     except Exception:
-        print("[ADK EVENT] summary print failed")
+        # print("[ADK EVENT] summary print failed")
+        print("[ADK EVENT] print failed")
 
 
 from google.adk.agents import LlmAgent
@@ -62,14 +64,20 @@ from src.tools.load_context import load_context
 
 # Old tool for rendering images in the UI.
 # from src.tools.render_images_in_conversation_window import render_images_in_conversation_window
-
 # New hybrid UI tool
 from src.tools.render_images_in_ui import render_images_in_ui
+
+
+#-------------------------------
+# Import the agent tools
+#-------------------------------
+from google.adk.tools import AgentTool
+from src.agents.session_reviewer_agent import agent as session_reviewer_agent
 
 # -------------------------
 # Prompt for the tutor agent
 # -------------------------
-SYSTEM_INSTRUCTION = """You are tutor agent — an intelligent, calm, empathetic, encouraging, step-by-step virtual tutor for school mathematics problems of grades 7 and 8. 
+SYSTEM_INSTRUCTION = """You are tutor agent: an intelligent, calm, empathetic, encouraging, step-by-step virtual tutor for school mathematics problems of grades 7 and 8. 
 You must follow these instructions precisely.
 
 1. Start the conversation by greeting the student warmly and asking for their name and grade.
@@ -123,9 +131,26 @@ You must follow these instructions precisely.
    A. The student arrives at the final answers, expresses understanding, and says they have no further questions about this problem.
    B. The student indicates they want to stop or no longer need help.
 
-11. If the student asks a question about a different Figure it Out problem in the middle of an already started session on a confirmed problem, tell them politely that this will count as a new tutoring session and they must quit the current session to start a new one.
+11. End-of-session protocol (must be followed exactly):
 
-12. Never assist with non–Figure it Out problems and never invent or hallucinate exercises. Only use the problem text and images returned by load_context.
+    A. Call the session_reviewer_agent tool EXACTLY ONCE with this manifest:
+        problem_text: problem_text returned by load_context
+        map_id: map_id returned by load_context
+        
+    B. Wait for the tool output. It will contain `session_summary` and `student_message`.
+
+    C. Tell the student:
+        <line break>
+        "Here is our session summary: <session_summary>"
+        <line break>
+        "Here is the reviewer's message to you: <student_message>"
+
+    D. End the session by saying:
+       "I have ended the session. Thank you for your patience!"
+   
+12. If the student asks a question about a different Figure it Out problem in the middle of an already started session on a confirmed problem, tell them politely that this will count as a new tutoring session and they must quit the current session to start a new one.
+
+13. Never assist with non Figure it Out problems and never invent or hallucinate exercises. Only use the problem text and images returned by load_context.
 """
 
 # For debugging
@@ -172,15 +197,16 @@ End. Do not generate any other content. The tool names are exact and must be use
 # -------------------------
 # ADK will automatically wrap native Python functions as FunctionTools when you pass them in `tools`.
 _AGENT = LlmAgent(
-    model="gemini-2.5-flash",           # adjust model name if desired
+    model="gemini-2.0-flash",           # adjust model name if desired
     name="tutor_agent",
     description="Tutors middle school students in mathematics (grades 7-8).",
     instruction=SYSTEM_INSTRUCTION,
     tools=[
         load_context,
         render_images_in_ui,
-        # legacy approach (commented out): render_images_in_conversation_window
+        # legacy approach (we are not using this tool anymore): render_images_in_conversation_window
         # render_images_in_conversation_window,
+        AgentTool(agent=session_reviewer_agent._AGENT),  # agent tool for reviewing past sessions
     ],               
 )
 logger.info("DEBUG: registered tools for agent: %s", [ getattr(t, "name", str(t)) for t in _AGENT.tools ])

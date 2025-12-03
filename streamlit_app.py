@@ -696,7 +696,7 @@ with center_col:
         worker.start()
 
         # Main thread: show spinner and poll the result queue
-        with st.spinner("Agent thinking..."):
+        with st.spinner("Tutor thinking..."):
             # poll until a result arrives
             while st.session_state.get("awaiting_agent", False):
                 try:
@@ -750,6 +750,80 @@ with center_col:
 
                     # update session id
                     st.session_state.session_id = new_session_id
+
+                    
+                    # Detect reviewer function call and handle it in-streamlit
+                    if (
+                        isinstance(function_calls_list, list)
+                        and any(fc.get("tool_name") == "session_reviewer_agent" for fc in function_calls_list)
+                    ):
+                        import json
+
+                        reviewer_call = next(fc for fc in function_calls_list if fc.get("tool_name") == "session_reviewer_agent")
+                        raw_args = reviewer_call.get("arguments") or reviewer_call.get("raw_arguments") or reviewer_call.get("args") or {}
+
+                        # Normalize to a dict manifest with top-level keys (map_id, problem_text, etc.)
+                        manifest = {}
+
+                        # Case A: arguments is already a dict with the fields we want
+                        if isinstance(raw_args, dict):
+                            # common patterns:
+                            # 1) {"request": {...}}  OR {"request": "<json-string>"}
+                            # 2) {"text": "<json-string>"} (rare)
+                            # 3) {"map_id": "...", "problem_text": "..."} (ideal)
+                            if "request" in raw_args:
+                                req = raw_args["request"]
+                                if isinstance(req, dict):
+                                    manifest = req.copy()
+                                elif isinstance(req, str):
+                                    try:
+                                        manifest = json.loads(req)
+                                    except Exception:
+                                        # fallback: keep as string under 'raw_request'
+                                        manifest = {"raw_request": req}
+                            elif "text" in raw_args and isinstance(raw_args["text"], str):
+                                # Defensive: sometimes wrappers put the payload under 'text'
+                                try:
+                                    manifest = json.loads(raw_args["text"])
+                                except Exception:
+                                    manifest = {"raw_text": raw_args["text"]}
+                            else:
+                                # Assume raw_args itself is the manifest (or contains map_id/problem_text)
+                                manifest = raw_args.copy()
+
+                        # Case B: arguments came as a JSON string
+                        elif isinstance(raw_args, str):
+                            try:
+                                parsed = json.loads(raw_args)
+                                if isinstance(parsed, dict):
+                                    manifest = parsed
+                                else:
+                                    manifest = {"raw_request": parsed}
+                            except Exception:
+                                manifest = {"raw_text": raw_args}
+
+                        # Ensure we have a dict and inject session_id
+                        manifest = manifest or {}
+                        manifest["session_id"] = st.session_state.get("session_id")
+
+                        logger.info("Calling reviewer with manifest = %s", manifest)
+
+                        # Call the reviewer (unchanged)
+                        from src.agents.session_reviewer_agent.agent import review_session_manifest
+                        with st.spinner("Reviewer reviewing..."):
+                            reviewer_result = review_session_manifest(manifest, tool_context=None)
+
+                        # Remove the temporary placeholder message from history (if still present)
+                        if st.session_state.history and st.session_state.history[-1].get("_placeholder"):
+                            st.session_state.history.pop()
+                        # Re-render chat to remove placeholder
+                        render_chat()
+                        st.components.v1.html("<script>window.scrollTo(0, document.body.scrollHeight);</script>", height=0)
+
+                        # store the reviewer result for later use by tutor agent
+                        st.session_state["reviewer_last_result"] = reviewer_result
+
+
 
                     # Use helper to extract images and sanitized agent text
                     try:
